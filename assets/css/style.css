@@ -1,0 +1,13 @@
+.shadow-container {
+    box-shadow: 0 0 25px hsla(0, 0%, 0%, 0.60);
+  }
+  .body-content {
+    background-color: white;
+    box-shadow: 0 0 25px hsla(0, 0%, 0%, 0.60);
+    padding: 0;
+    text-align: center;
+  }
+  .navbar {
+    margin: 0 !important; /* Avoid !important, added here for priority in snippet */
+    border-bottom: 0 !important;
+  }
