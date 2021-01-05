@@ -1,23 +1,33 @@
 <?php
 include 'database.php';
 
-$table = 'employees';
+#LOGIC TO SELECT THE TABLE
+$table_name = 'employees';
 
-if (isset($_GET['path']) and $_GET['path'] !== $table) {
+if (isset($_GET['path']) and $_GET['path'] !== $table_name) {
     if ($_GET['path'] == 'employees' or $_GET['path'] == 'projects')
-        $table = $_GET['path'];
+        $table_name = $_GET['path'];
 }
-// echo $table;
+// echo $table_name;
 
-$sql = "SELECT "
-    . $table . ".id, "
-    . $table . ".name, GROUP_CONCAT(" . ($table === 'projects' ? 'employees' : 'projects') . ".name SEPARATOR \", \")" .
-    " FROM " . $table .
-    " LEFT JOIN " . ($table === 'projects' ? 'employees' : 'projects') .
-    " ON " . ($table === 'projects' ? 'employees.project_id = projects.id' : 'employees.project_id = projects.id') .
-    " GROUP BY " . $table . ".id";
+#SELECT
+$sql =
+    "SELECT "
+    . $table_name . ".id, "
+    . $table_name . ".name, GROUP_CONCAT(" . ($table_name === 'projects' ? 'employees' : 'projects') . ".name SEPARATOR '; ')" .
+    " FROM " . $table_name .
+    " LEFT JOIN " . ($table_name === 'projects' ? 'employees' : 'projects') .
+    " ON " . ($table_name === 'projects' ? 'employees.project_id = projects.id' : 'employees.project_id = projects.id') .
+    " GROUP BY " . $table_name . ".id";
 
+#DELETE
+if(isset($_GET['delete'])){
+    $sql_delete = "DELETE FROM " . $table_name . " WHERE id = " . $_GET['delete'];
+    $stmt = $conn->prepare($sql_delete);
+    $stmt->execute();
+}
 
+#SEARCH
 if (isset($_POST['search1'])) {
     if ($_GET['path'] == 'employees' || $_GET['path'] == "") {
 
@@ -29,12 +39,13 @@ if (isset($_POST['search1'])) {
         $search_term = $conn->real_escape_string($_POST['search_box']);
         $sql_search = "SELECT projects.id, projects.name, employees.name FROM employees, projects WHERE employees.project_id = projects.id AND projects.name LIKE '%$search_term%'";
         $stmt = $conn->prepare($sql_search);
-        $stmt->bind_result($id, $first_en, $second_en);
+        $stmt->bind_result($id, $first_en, $second_en); //binding by position
     }
 } else {
     $stmt = $conn->prepare($sql);
     $stmt->bind_result($id, $first_en, $second_en);
 }
+
 
 $stmt->execute();
 // var_dump($stmt);
@@ -63,7 +74,7 @@ $stmt->execute();
                     <div class="collapse navbar-collapse " id="navbarSupportedContent">
                         <div>
                             <div class="dropdown mr-5 ">
-                                <button class="btn btn-primary dropdown-toggle pr-4 pl-4" type="button" data-toggle="dropdown">Manage Data
+                                <button class="btn btn-primary dropdown-toggle pr-4 pl-4" type="button" data-toggle="dropdown">Manage Table
                                     <span class="caret"></span></button>
                                 <ul class="dropdown-menu">
                                     <div class="d-flex flex-column justify-content-center align-items-center">
@@ -87,19 +98,20 @@ $stmt->execute();
 
         <?php
 
-        print('<div class="container mt-5"><table class="table"><thead><tr><th>ID</th><th>Name</th><th>' . ($_GET['path'] === 'projects' ?  "Employee" : "Projects") . '</th><th>Action</th>');
+        print('<div class="container mt-5"><table class="table"><thead><tr><th>ID</th><th>' . ($_GET['path'] === 'projects' ?  "Project's Name" : "Employee's Name") . '</th><th>' . ($_GET['path'] === 'projects' ?  "Employee's Name" : "Project's Name") . '</th><th>Action</th>');
 
-            while ($stmt->fetch()) {
-                echo "<tr>
+        while ($stmt->fetch()) {
+            echo "<tr>
                     <td>" . $id . "</td>
                     <td>" . $first_en . "</td>
                     <td>" . $second_en . "</td>
                     <td>
-                        <button><a href=\"?path=" . $table . "&delete=$id\">DELETE</a></button>
-                        <button><a href=\"?path=" . $table . "&update=$id\">UPDATE</a></button>
+                        <button><a href=\"?path=" . $table_name . "&delete=$id\">" . ($_GET['path'] === 'projects' ?  "DELETE PROJECT" : "DELETE EMPLOYEE") . "</a></button>
+                        <button><a href=\"?path=" . $table_name . "&update=$id\">" . ($_GET['path'] === 'projects' ?  "UPDATE PROJECT" : "UPDATE EMPLOYEE") . "</a></button>
                     </td>
                 </tr>";
-            }
+        }
+        print ('</table>');
         ?>
     </main>
 </body>
