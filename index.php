@@ -1,50 +1,11 @@
 <?php
-include 'database.php';
+session_start();
+include 'database/database.php';
+include 'app/selection.php';
+include 'app/save.php';
+include 'app/delete.php';
+include 'app/search.php';
 
-#LOGIC TO SELECT THE TABLE
-$table_name = 'employees';
-
-if (isset($_GET['path']) and $_GET['path'] !== $table_name) {
-    if ($_GET['path'] == 'employees' or $_GET['path'] == 'projects')
-        $table_name = $_GET['path'];
-}
-// echo $table_name;
-
-#SELECT
-$sql =
-    "SELECT "
-    . $table_name . ".id, "
-    . $table_name . ".name, GROUP_CONCAT(" . ($table_name === 'projects' ? 'employees' : 'projects') . ".name SEPARATOR '; ')" .
-    " FROM " . $table_name .
-    " LEFT JOIN " . ($table_name === 'projects' ? 'employees' : 'projects') .
-    " ON " . ($table_name === 'projects' ? 'employees.project_id = projects.id' : 'employees.project_id = projects.id') .
-    " GROUP BY " . $table_name . ".id";
-
-#DELETE
-if(isset($_GET['delete'])){
-    $sql_delete = "DELETE FROM " . $table_name . " WHERE id = " . $_GET['delete'];
-    $stmt = $conn->prepare($sql_delete);
-    $stmt->execute();
-}
-
-#SEARCH
-if (isset($_POST['search1'])) {
-    if ($_GET['path'] == 'employees' || $_GET['path'] == "") {
-
-        $search_term = $conn->real_escape_string($_POST['search_box']);
-        $sql_search = "SELECT employees.id, employees.name, projects.name FROM employees, projects WHERE employees.project_id = projects.id AND employees.name LIKE '%$search_term%'";
-        $stmt = $conn->prepare($sql_search);
-        $stmt->bind_result($id, $first_en, $second_en);
-    } else {
-        $search_term = $conn->real_escape_string($_POST['search_box']);
-        $sql_search = "SELECT projects.id, projects.name, employees.name FROM employees, projects WHERE employees.project_id = projects.id AND projects.name LIKE '%$search_term%'";
-        $stmt = $conn->prepare($sql_search);
-        $stmt->bind_result($id, $first_en, $second_en); //binding by position
-    }
-} else {
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_result($id, $first_en, $second_en);
-}
 
 
 $stmt->execute();
@@ -58,7 +19,7 @@ $stmt->execute();
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Project Manager</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="resources/css/style.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -67,6 +28,16 @@ $stmt->execute();
 </head>
 
 <body>
+    <?php
+
+    if (isset($_SESSION['message'])) : ?>
+        <div class="alert alert-<?= $_SESSION['msg_type'] ?>">
+            <?php
+            echo $_SESSION['message'];
+            unset($_SESSION['message']);
+            ?>
+        </div>
+    <?php endif ?>
     <header>
         <div class="shadow-container">
             <div class="body-content">
@@ -94,31 +65,75 @@ $stmt->execute();
             </div>
         </div>
     </header>
+
     <main>
+        <div class="container mt-5">
+            <div class="row justify-content-left">
+
+                <form action="<?php ($_SERVER['REQUEST_URI']); ?>" method="post">
+                    <?php
+
+                    if ($_GET['path'] == "employees" || $_GET['path'] == "") :
+                    ?>
+                        <input type="hidden" name="id" value="">
+                        <div class="form-group">
+                            <label for="name">Add Employee</label>
+                            <input type="text" class="form-control" name="name" value="" placeholder="Enter employee's name">
+                        </div>
+                    <?php else : ?>
+                        <div class="form-group">
+                            <label for="location">Add Project</label>
+                            <input type="text" class="form-control" value="" name="name" placeholder="Enter project's name">
+                        </div>
+                    <?php endif; ?>
+                    <div class="form-group">
+                        <?php if ($update == true) :
+                        ?>
+                            <button class="btn btn-info" type="submit" name="update">Update</button>
+                        <?php else : ?>
+                            <button class="btn btn-primary" type="submit" name="save">Save</button>
+                        <?php endif; ?>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <?php
 
         print('<div class="container mt-5"><table class="table"><thead><tr><th>ID</th><th>' . ($_GET['path'] === 'projects' ?  "Project's Name" : "Employee's Name") . '</th><th>' . ($_GET['path'] === 'projects' ?  "Employee's Name" : "Project's Name") . '</th><th>Action</th>');
-
-        while ($stmt->fetch()) {
-            echo "<tr>
+        
+        $stmt->store_result();
+        $count = $stmt->num_rows;
+            if($count > 0){
+            while ($stmt->fetch()) {
+                echo "<tr>
                     <td>" . $id . "</td>
                     <td>" . $first_en . "</td>
                     <td>" . $second_en . "</td>
                     <td>
                         <button><a href=\"?path=" . $table_name . "&delete=$id\">" . ($_GET['path'] === 'projects' ?  "DELETE PROJECT" : "DELETE EMPLOYEE") . "</a></button>
-                        <button><a href=\"?path=" . $table_name . "&update=$id\">" . ($_GET['path'] === 'projects' ?  "UPDATE PROJECT" : "UPDATE EMPLOYEE") . "</a></button>
+                        <button><a href=\"?path=" . $table_name . "&update=$id\">" . ($_GET['path'] === 'projects' ?  "EDIT PROJECT" : "EDIT EMPLOYEE") . "</a></button>
                     </td>
                 </tr>";
+            }
+            print('</table>');
+            print('<br />');
+            print('<br />');
+        } else {
+            echo ("<tr>
+        <td>No data found</td></tr>");
         }
-        print ('</table>');
         ?>
+
     </main>
 </body>
 
 </html>
 <?php
+$stmt->free_result();
 $stmt->close();
 
 mysqli_close($conn);
+// unset($_SESSION['msg_type']);
+
 ?>
