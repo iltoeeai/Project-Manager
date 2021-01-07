@@ -7,12 +7,14 @@ if(isset($_GET['delete'])){
     $stmt = $conn->prepare($sql_delete);
     $stmt->execute();
     
-    // ob_start();
     $_SESSION['message'] = "Record has been deleted";
     $_SESSION['msg_type'] = "danger";
-    ob_clean();
-    ob_start();
-    header("Location: index.php?path=" . $_GET['path']);
-    ob_flush();
+    // ob_clean();
+    // ob_start();
+    $stmt->close();
+    mysqli_close($conn);
+    // header("Location: index.php?path=" . $_GET['path']);
+    header("Location: " . strtok($_SERVER['REQUEST_URI'], '&'));
+    // ob_flush();
     exit;
 }

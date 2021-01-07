@@ -5,11 +5,10 @@ include 'app/selection.php';
 include 'app/save.php';
 include 'app/delete.php';
 include 'app/search.php';
-
+include 'app/edit.php';
 
 
 $stmt->execute();
-// var_dump($stmt);
 
 ?>
 
@@ -27,6 +26,7 @@ $stmt->execute();
 
 </head>
 
+
 <body>
     <?php
 
@@ -38,6 +38,8 @@ $stmt->execute();
             ?>
         </div>
     <?php endif ?>
+
+
     <header>
         <div class="shadow-container">
             <div class="body-content">
@@ -66,45 +68,68 @@ $stmt->execute();
         </div>
     </header>
 
+
     <main>
         <div class="container mt-5">
             <div class="row justify-content-left">
 
                 <form action="<?php ($_SERVER['REQUEST_URI']); ?>" method="post">
-                    <?php
-
-                    if ($_GET['path'] == "employees" || $_GET['path'] == "") :
-                    ?>
-                        <input type="hidden" name="id" value="">
+                    <?php if ($_GET['path'] == "employees" || $_GET['path'] == "") : ?>
+                        <!-- <input type="hidden" name="id" value=""> -->
                         <div class="form-group">
-                            <label for="name">Add Employee</label>
-                            <input type="text" class="form-control" name="name" value="" placeholder="Enter employee's name">
+                            <label for="name"><?php echo (($update == true) ? ("<strong>Edit Employee</strong>") : ("<strong>Add Employee</strong>")); ?></label>
+                            <div class="form-group d-flex">
+                                <input type="text" class="form-control" name="name" value="<?php echo ($update == true ? $first_en : ""); ?>" placeholder="Enter employee's name">
+                                <!-- <?php if ($update == true) : ?>
+
+                                    <select class="ml-5 custom-select">
+
+                                        <?php
+                                        $query = $db->prepare("SELECT id, name  FROM projects");
+                                        $query->execute();
+                                        $row = $query->fetchAll(PDO::FETCH_NUM);
+                                        $rowFormatted = array_map(function ($el) {
+                                            return [$el[0] => $el[1]];
+                                        }, $row);
+                                        foreach ($rowFormatted as $el[0] => $el[1]) {
+                                            echo "<option value='$el[0]'>$el[1]</option>";
+                                        }
+
+                                        ?>
+
+
+                                    </select>
+                            </div>
+                        <?php endif; ?> -->
                         </div>
                     <?php else : ?>
                         <div class="form-group">
-                            <label for="location">Add Project</label>
-                            <input type="text" class="form-control" value="" name="name" placeholder="Enter project's name">
+                            <label for="name"><?php echo (($update == true) ? ("<strong>Edit Project</strong>") : ("<strong>Add Project</strong>")); ?></label>
+                            <input type="text" class="form-control" value="<?php echo ($update == true ? $first_en : ""); ?>" name="name" placeholder="Enter project's name">
                         </div>
                     <?php endif; ?>
+
                     <div class="form-group">
-                        <?php if ($update == true) :
-                        ?>
+
+                        <?php if ($update == true) : ?>
                             <button class="btn btn-info" type="submit" name="update">Update</button>
                         <?php else : ?>
                             <button class="btn btn-primary" type="submit" name="save">Save</button>
                         <?php endif; ?>
+
                     </div>
                 </form>
+
             </div>
         </div>
 
         <?php
 
         print('<div class="container mt-5"><table class="table"><thead><tr><th>ID</th><th>' . ($_GET['path'] === 'projects' ?  "Project's Name" : "Employee's Name") . '</th><th>' . ($_GET['path'] === 'projects' ?  "Employee's Name" : "Project's Name") . '</th><th>Action</th>');
-        
+
         $stmt->store_result();
         $count = $stmt->num_rows;
-            if($count > 0){
+        if ($count > 0) {
             while ($stmt->fetch()) {
                 echo "<tr>
                     <td>" . $id . "</td>
@@ -112,7 +137,7 @@ $stmt->execute();
                     <td>" . $second_en . "</td>
                     <td>
                         <button><a href=\"?path=" . $table_name . "&delete=$id\">" . ($_GET['path'] === 'projects' ?  "DELETE PROJECT" : "DELETE EMPLOYEE") . "</a></button>
-                        <button><a href=\"?path=" . $table_name . "&update=$id\">" . ($_GET['path'] === 'projects' ?  "EDIT PROJECT" : "EDIT EMPLOYEE") . "</a></button>
+                        <button><a href=\"?path=" . $table_name . "&edit=$id\">" . ($_GET['path'] === 'projects' ?  "EDIT PROJECT" : "EDIT EMPLOYEE") . "</a></button>
                     </td>
                 </tr>";
             }
@@ -134,6 +159,6 @@ $stmt->free_result();
 $stmt->close();
 
 mysqli_close($conn);
-// unset($_SESSION['msg_type']);
+unset($_SESSION['msg_type']);
 
 ?>
