@@ -6,9 +6,10 @@ include 'app/save.php';
 include 'app/delete.php';
 include 'app/search.php';
 include 'app/edit.php';
+include 'app/update.php';
 
 
-$stmt->execute();
+// $stmt->execute();
 
 ?>
 
@@ -80,27 +81,22 @@ $stmt->execute();
                             <label for="name"><?php echo (($update == true) ? ("<strong>Edit Employee</strong>") : ("<strong>Add Employee</strong>")); ?></label>
                             <div class="form-group d-flex">
                                 <input type="text" class="form-control" name="name" value="<?php echo ($update == true ? $first_en : ""); ?>" placeholder="Enter employee's name">
-                                <!-- <?php if ($update == true) : ?>
 
-                                    <select class="ml-5 custom-select">
+                                <?php
 
-                                        <?php
-                                        $query = $db->prepare("SELECT id, name  FROM projects");
-                                        $query->execute();
-                                        $row = $query->fetchAll(PDO::FETCH_NUM);
-                                        $rowFormatted = array_map(function ($el) {
-                                            return [$el[0] => $el[1]];
-                                        }, $row);
-                                        foreach ($rowFormatted as $el[0] => $el[1]) {
-                                            echo "<option value='$el[0]'>$el[1]</option>";
-                                        }
-
-                                        ?>
-
-
-                                    </select>
+                                if ($update) {
+                                    $query = "SELECT projects.id, projects.name FROM projects";
+                                    $res = mysqli_query($conn, $query) or die(mysqli_connect_error($query));
+                                    echo ("<select class='ml-5 custom-select' name='select_name'>");
+                                    echo ("<option value=''selected disabled>Projects</option>");
+                                    while ($row = mysqli_fetch_array($res)) {
+                                        echo "<option value=" . $row['id'] . ">" . $row['name'] . "</option>";
+                                    }
+                                    echo ("</select>");
+                                }
+                                ?>
                             </div>
-                        <?php endif; ?> -->
+
                         </div>
                     <?php else : ?>
                         <div class="form-group">
@@ -127,6 +123,7 @@ $stmt->execute();
 
         print('<div class="container mt-5"><table class="table"><thead><tr><th>ID</th><th>' . ($_GET['path'] === 'projects' ?  "Project's Name" : "Employee's Name") . '</th><th>' . ($_GET['path'] === 'projects' ?  "Employee's Name" : "Project's Name") . '</th><th>Action</th>');
 
+        $stmt->execute();
         $stmt->store_result();
         $count = $stmt->num_rows;
         if ($count > 0) {
