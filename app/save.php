@@ -1,5 +1,4 @@
 <?php
-// session_start();
 
 if (isset($_POST['save'])) {
 
@@ -10,13 +9,10 @@ if (isset($_POST['save'])) {
     
     $_SESSION['message'] = "Record has been saved";
     $_SESSION['msg_type'] = 'success';
-    // ob_clean();
-    // ob_start();
+   
     $stmt->close();
     mysqli_close($conn);
-    // header("Location: index.php?path=" . $_GET['path']);
     header("Location: " . strtok($_SERVER['REQUEST_URI'], '&')); 
-    // ob_flush();
-    // exit;
+
     die();
 }

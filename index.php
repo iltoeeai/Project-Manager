@@ -8,9 +8,6 @@ include 'app/search.php';
 include 'app/edit.php';
 include 'app/update.php';
 
-
-// $stmt->execute();
-
 ?>
 
 <!DOCTYPE html>
@@ -27,12 +24,11 @@ include 'app/update.php';
 
 </head>
 
-
 <body>
     <?php
 
     if (isset($_SESSION['message'])) : ?>
-        <div class="alert alert-<?= $_SESSION['msg_type'] ?>">
+        <div class="alert mr-2 ml-2 alert-<?= $_SESSION['msg_type'] ?>">
             <?php
             echo $_SESSION['message'];
             unset($_SESSION['message']);
@@ -40,9 +36,8 @@ include 'app/update.php';
         </div>
     <?php endif ?>
 
-
     <header>
-        <div class="shadow-container">
+        <div class="shadow-container mr-2 ml-2">
             <div class="body-content">
                 <nav class="navbar navbar-expand-lg navbar-light bg-light mt-3 ">
                     <div class="collapse navbar-collapse " id="navbarSupportedContent">
@@ -63,12 +58,13 @@ include 'app/update.php';
                             <button class="btn btn-outline-success my-2 my-sm-0" type="submit" name="search1" value="Search">
                                 <?php echo ($_GET['path'] === 'projects' ?  "Search for project" : "Search for employee"); ?></button>
                         </form>
+
                     </div>
+                    <div class="float-end align-middle"><span class="align-middle text-primary ">PROJECT MANAGER</span></div>
                 </nav>
             </div>
         </div>
     </header>
-
 
     <main>
         <div class="container mt-5">
@@ -76,7 +72,6 @@ include 'app/update.php';
 
                 <form action="<?php ($_SERVER['REQUEST_URI']); ?>" method="post">
                     <?php if ($_GET['path'] == "employees" || $_GET['path'] == "") : ?>
-                        <!-- <input type="hidden" name="id" value=""> -->
                         <div class="form-group">
                             <label for="name"><?php echo (($update == true) ? ("<strong>Edit Employee</strong>") : ("<strong>Add Employee</strong>")); ?></label>
                             <div class="form-group d-flex">
@@ -144,10 +139,16 @@ include 'app/update.php';
         } else {
             echo ("<tr>
         <td>No data found</td></tr>");
+            print('</table>');
         }
         ?>
-
     </main>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container mr-2 ml-2">
+            <span class="text-muted">Tadas Baltic Institute of technology 2021</span>
+        </div>
+    </footer>
 </body>
 
 </html>
