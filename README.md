@@ -2,13 +2,13 @@
 
 This is a plain PHP CRUD application created to manage employees and projects. 
 
-- :heavy_check_mark: add employee/project
-- :heavy_check_mark: delete employee/project
-- :heavy_check_mark: search for employee/project
-- :heavy_check_mark: edit employee/project
-- :heavy_check_mark: assign employee to the project
-- :heavy_check_mark: assign multiple employees to the project
-- :heavy_check_mark: MYSQL database
+ :heavy_check_mark: add employee/project <br>
+ :heavy_check_mark: delete employee/project <br>
+ :heavy_check_mark: search for employee/project <br>
+ :heavy_check_mark: edit employee/project<br>
+ :heavy_check_mark: assign employee to the project<br>
+ :heavy_check_mark: assign multiple employees to the project<br>
+ :heavy_check_mark: MYSQL database
 ___ 
 <br>
 
@@ -27,7 +27,7 @@ ___
 # Screenshots
 
 <div>
-    <img src="resources/pic1.png"/><br>
-    <img src="resources/pic2.png"/><br>
-    <img src="resources/pic3.png"/><br>
+    <img src="resources/img/pic1.png"/><br>
+    <img src="resources/img/pic2.png"/><br>
+    <img src="resources/img/pic3.png"/><br>
 </div>
