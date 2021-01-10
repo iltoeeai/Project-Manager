@@ -158,5 +158,5 @@ $stmt->close();
 
 mysqli_close($conn);
 unset($_SESSION['msg_type']);
-
+session_destroy();
 ?>
